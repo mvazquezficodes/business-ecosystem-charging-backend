@@ -23,9 +23,9 @@ VERIFY_REQUESTS = True
 SITE = "http://proxy.docker:8004/"
 LOCAL_SITE = "http://charging.docker:8006/"
 
-CATALOG = "http://apis.docker:8080/catalog"
+CATALOG = "http://host.docker.internal:8632"
 INVENTORY = "http://apis.docker:8080/DSProductInventory"
-ORDERING = "http://apis.docker:8080/DSProductOrdering"
+ORDERING = "http://host.docker.internal:8634"
 BILLING = "http://apis.docker:8080/DSBillingManagement"
 RSS = "http://rss.docker:8080/DSRevenueSharing"
 USAGE = "http://apis.docker:8080/DSUsageManagement"
