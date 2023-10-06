@@ -62,10 +62,10 @@ class ServiceRecordCollection(Resource):
         usage_client = UsageClient()
         if response is not None:
             # The usage document is not valid, change its state to Rejected
-            usage_client.update_usage_state(data["id"], "Rejected")
+            usage_client.update_usage_state(data["id"], "rejected")
         else:
             # The usage document is valid, change its state to Guided
-            usage_client.update_usage_state(data["id"], "Guided")
+            usage_client.update_usage_state(data["id"], "guided")
             sdr_manager.update_usage()
             response = build_response(request, 200, "OK")
 

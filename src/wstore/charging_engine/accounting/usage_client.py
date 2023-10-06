@@ -34,7 +34,7 @@ class UsageClient(object):
             self._usage_api += "/"
 
     def _validate_state(self, state):
-        valid_states = ["Guided", "Rated", "Rejected", "Billed"]
+        valid_states = ["guided", "rated", "rejected", "billed"]
 
         if state not in valid_states:
             raise UsageError("Invalid usage status " + state)
@@ -63,7 +63,7 @@ class UsageClient(object):
         :param usage_spec: usage specification to be created
         :return: the created usage specification
         """
-        path = "api/usageManagement/v2/usageSpecification/"
+        path = "usageSpecification/"
         url = urljoin(self._usage_api, path)
 
         return self._create_usage_item(url, usage_spec)
@@ -74,7 +74,7 @@ class UsageClient(object):
         :param usage: usage document to be created
         :return:the created usage document
         """
-        path = "api/usageManagement/v2/usage/"
+        path = "usage/"
         url = urljoin(self._usage_api, path)
 
         return self._create_usage_item(url, usage)
@@ -84,7 +84,7 @@ class UsageClient(object):
         Deletes a usage specification from the usage API
         :param spec_id: id of the usage specification to be deleted
         """
-        path = "api/usageManagement/v2/usageSpecification/" + spec_id
+        path = "usageSpecification/" + spec_id
         url = urljoin(self._usage_api, path)
 
         r = requests.delete(url)
@@ -99,7 +99,7 @@ class UsageClient(object):
         :return: List of customer usages
         """
         # Get customer usage filtered by state
-        path = "api/usageManagement/v2/usage"
+        path = "usage"
         url = urljoin(self._usage_api, path) + "?relatedParty.id=" + customer
 
         if state is not None:
@@ -115,7 +115,7 @@ class UsageClient(object):
         return [usage_doc for usage_doc in raw_usage if self._belongs_to_product(usage_doc, product_id)]
 
     def _patch_usage(self, usage_id, patch):
-        path = "api/usageManagement/v2/usage/" + str(usage_id)
+        path = "usage/" + str(usage_id)
         url = urljoin(self._usage_api, path)
 
         r = requests.patch(url, json=patch)
@@ -151,7 +151,7 @@ class UsageClient(object):
 
         product_url = urljoin(inventory_url, "api/productInventory/v2/product/" + str(product_id))
         patch = {
-            "status": "Rated",
+            "status": "rated",
             "ratedProductUsage": [
                 {
                     "ratingDate": timestamp.replace(" ", "T"),
