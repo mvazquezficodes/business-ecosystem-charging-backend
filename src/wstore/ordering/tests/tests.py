@@ -533,6 +533,8 @@ class OrderingManagementTestCase(TestCase):
         err_msg=None,
         terms_accepted=True,
     ):
+        # if name == 'free_add':
+        #    import ipdb; ipdb.sset_trace()
 
         OFFERING["productOfferingPrice"] = [pricing]
 

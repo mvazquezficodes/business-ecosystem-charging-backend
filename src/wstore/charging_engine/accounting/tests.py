@@ -115,7 +115,7 @@ class SDRManagerTestCase(TestCase):
         del sdr["usageCharacteristic"]
 
     def _mod_inv_state(self, sdr):
-        sdr["status"] = "Rated"
+        sdr["status"] = "rated"
 
     def _mod_multiple_values(self, sdr):
         sdr["usageCharacteristic"].append({"name": "unit", "value": "invocation"})
@@ -296,7 +296,7 @@ class UsageClientTestCase(TestCase):
     tags = ("usage-client",)
 
     def setUp(self):
-        usage_client.settings.USAGE = "http://example.com/DSUsageManagement"
+        usage_client.settings.USAGE = "http://example.com"
         usage_client.requests = MagicMock()
         self._old_inv = usage_client.settings.INVENTORY
         usage_client.settings.INVENTORY = "http://localhost:8080/DSProductInventory"
@@ -314,8 +314,8 @@ class UsageClientTestCase(TestCase):
                 "filtered_by_state",
                 [NON_PRODUCT_USAGE, BASIC_USAGE],
                 [BASIC_USAGE],
-                "&status=Guided",
-                "Guided",
+                "&status=guided",
+                "guided",
             ),
             ("product_not_found", [NON_PRODUCT_USAGE], []),
         ]
@@ -335,7 +335,7 @@ class UsageClientTestCase(TestCase):
         # Verify calls
         usage_client.requests.get.assert_called_once_with(
             usage_client.settings.USAGE
-            + "/api/usageManagement/v2/usage?relatedParty.id="
+            + "/usage?relatedParty.id="
             + self._customer
             + extra_query,
             headers={"Accept": "application/json"},
@@ -370,7 +370,7 @@ class UsageClientTestCase(TestCase):
 
         # Verify calls
         usage_client.requests.patch.assert_called_once_with(
-            usage_client.settings.USAGE + "/api/usageManagement/v2/usage/" + BASIC_USAGE["id"],
+            usage_client.settings.USAGE + "/usage/" + BASIC_USAGE["id"],
             json=expected_json,
         )
 
@@ -378,7 +378,7 @@ class UsageClientTestCase(TestCase):
 
     def test_update_usage_state(self):
         # Create Mocks
-        status = "Rated"
+        status = "rated"
         expected_json = {"status": status}
         client = usage_client.UsageClient()
 
@@ -400,7 +400,7 @@ class UsageClientTestCase(TestCase):
         product_url = site + "DSProductInventory/api/productInventory/v2/product/" + self._product_id
 
         expected_json = {
-            "status": "Rated",
+            "status": "rated",
             "ratedProductUsage": [
                 {
                     "ratingDate": timestamp,
@@ -535,8 +535,8 @@ class SDRCollectionTestCase(TestCase):
             if exp_code == 200:
                 views.SDRManager.assert_called_once_with()
                 self._manager_inst.validate_sdr.assert_called_once_with(parsed_data)
-                views.UsageClient().update_usage_state.assert_called_once_with("1", "Guided")
+                views.UsageClient().update_usage_state.assert_called_once_with("1", "guided")
                 self._manager_inst.update_usage.assert_called_once_with()
             else:
-                views.UsageClient().update_usage_state.assert_called_once_with("1", "Rejected")
+                views.UsageClient().update_usage_state.assert_called_once_with("1",  "rejected")
                 self.assertEquals(0, self._manager_inst.update_usage.call_count)
