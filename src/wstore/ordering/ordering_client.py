@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2015 - 2016 CoNWeT Lab., Universidad Politécnica de Madrid
+# Copyright (c) 2015 CoNWeT Lab., Universidad Politécnica de Madrid
+# Copyright (c) 2023 Future Internet Consulting and Development Solutions S.L.
 
 # This file belongs to the business-charging-backend
 # of the Business API Ecosystem.
@@ -50,7 +51,7 @@ class OrderingClient:
             raise ImproperlyConfigured(msg)
 
     def get_order(self, order_id):
-        path = "/DSProductOrdering/api/productOrdering/v2/productOrder/" + str(order_id)
+        path = "/productOrder/" + str(order_id)
         url = urljoin(self._ordering_api, path)
 
         r = requests.get(url)
@@ -72,11 +73,10 @@ class OrderingClient:
         }
 
         # Make PATCH request
-        path = "/DSProductOrdering/api/productOrdering/v2/productOrder/" + str(order["id"])
+        path = "/productOrder/" + str(order["id"])
         url = urljoin(self._ordering_api, path)
 
         r = requests.patch(url, json=patch)
-
         r.raise_for_status()
 
     def update_items_state(self, order, state, items=None):
@@ -88,25 +88,26 @@ class OrderingClient:
         :return:
         """
 
+        self.update_state(order, state)
+
         # Build patch body
         patch = {
-            "orderItem": [],
+            "productOrderItem": [],
         }
 
         if items is None:
-            items = order["orderItem"]
+            items = order["productOrderItem"]
 
-        for orderItem in order["orderItem"]:
+        for orderItem in order["productOrderItem"]:
             for item in items:
                 if orderItem["id"] == item["id"]:
                     orderItem["state"] = state
 
-            patch["orderItem"].append(orderItem)
+            patch["productOrderItem"].append(orderItem)
 
         # Make PATCH request
-        path = "/DSProductOrdering/api/productOrdering/v2/productOrder/" + str(order["id"])
+        path = "/productOrder/" + str(order["id"])
         url = urljoin(self._ordering_api, path)
 
         r = requests.patch(url, json=patch)
-
         r.raise_for_status()

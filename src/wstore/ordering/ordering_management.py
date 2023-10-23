@@ -58,12 +58,12 @@ class OrderingManager:
     def _get_offering(self, item):
         # Download related product offering and product specification
         site = urlparse(settings.SITE)
-        off = urlparse(item["productOffering"]["href"])
+        catalog = urlparse(settings.CATALOG)
 
-        offering_url = "{}://{}{}".format(site.scheme, site.netloc, off.path)
+        offering_id = item["productOffering"]["href"]
+        offering_url = "{}://{}{}/{}".format(catalog.scheme, catalog.netloc, catalog.path + '/productOffering', offering_id)
+
         offering_info = self._download(offering_url, "product offering", item["id"])
-
-        offering_id = offering_info["id"]
 
         # Check if the offering has been already loaded in the system
         if len(Offering.objects.filter(off_id=offering_id)) > 0:
@@ -202,8 +202,6 @@ class OrderingManager:
         return price
 
     def _build_contract(self, item):
-        # TODO: Check that the ordering API is actually validating that the chosen pricing and characteristics are valid for the given product
-
         # Build offering
         offering, offering_info = self._get_offering(item)
 
@@ -253,66 +251,75 @@ class OrderingManager:
                     )
 
         # Calculate the revenue sharing class
-        revenue_class = offering_info["serviceCandidate"]["id"]
+        # revenue_class = offering_info["serviceCandidate"]["id"]
 
         return Contract(
             item_id=item["id"],
             pricing_model=pricing,
-            revenue_class=revenue_class,
+            #revenue_class=revenue_class,
             offering=offering.pk,
         )
 
     def _get_billing_address(self, items):
-        def _download_asset(url):
-            headers = {
-                #'Authorization': 'Bearer ' + self._customer.userprofile.access_token
-            }
+        # def _download_asset(url):
+        #     headers = {
+        #         #'Authorization': 'Bearer ' + self._customer.userprofile.access_token
+        #     }
 
-            if not self._customer.userprofile.current_organization.private:
-                headers["x-organization"] = self._customer.userprofile.current_organization.name
+        #     if not self._customer.userprofile.current_organization.private:
+        #         headers["x-organization"] = self._customer.userprofile.current_organization.name
 
-            r = requests.get(url, headers=headers, verify=settings.VERIFY_REQUESTS)
+        #     r = requests.get(url, headers=headers, verify=settings.VERIFY_REQUESTS)
 
-            if r.status_code != 200:
-                logger.error("Status code `{r.status_code}` at the time of retrieving the Billing Address")
-                raise OrderingError("There was an error at the time of retrieving the Billing Address")
+        #     if r.status_code != 200:
+        #         logger.error("Status code `{r.status_code}` at the time of retrieving the Billing Address")
+        #         raise OrderingError("There was an error at the time of retrieving the Billing Address")
 
-            return r.json()
+        #     return r.json()
 
-        site = urlparse(settings.SITE)
+        # site = urlparse(settings.SITE)
 
-        billing_url = urlparse(items[0]["billingAccount"][0]["href"])
+        # billing_url = urlparse(items[0]["billingAccount"][0]["href"])
 
-        billing_local = urlparse(settings.BILLING)
+        # billing_local = urlparse(settings.BILLING)
 
-        billing_account = _download_asset(
-            "{}://{}{}".format(billing_local.scheme, billing_local.netloc, billing_url.path)
-        )
+        # billing_account = _download_asset(
+        #     "{}://{}{}".format(billing_local.scheme, billing_local.netloc, billing_url.path)
+        # )
 
-        customer_acc_url = urlparse(billing_account["customerAccount"]["href"])
-        customer_account = _download_asset(
-            "{}://{}{}".format(billing_local.scheme, billing_local.netloc, customer_acc_url.path)
-        )
+        # customer_acc_url = urlparse(billing_account["customerAccount"]["href"])
+        # customer_account = _download_asset(
+        #     "{}://{}{}".format(billing_local.scheme, billing_local.netloc, customer_acc_url.path)
+        # )
 
-        customer_url = urlparse(customer_account["customer"]["href"])
-        customer = _download_asset("{}://{}{}".format(billing_local.scheme, billing_local.netloc, customer_url.path))
+        # customer_url = urlparse(customer_account["customer"]["href"])
+        # customer = _download_asset("{}://{}{}".format(billing_local.scheme, billing_local.netloc, customer_url.path))
 
-        postal_addresses = [
-            contactMedium for contactMedium in customer["contactMedium"] if contactMedium["type"] == "PostalAddress"
-        ]
+        # postal_addresses = [
+        #     contactMedium for contactMedium in customer["contactMedium"] if contactMedium["type"] == "PostalAddress"
+        # ]
 
-        if len(postal_addresses) != 1:
-            logger.error("Provided Billing Account does not contain a Postal Address")
-            raise OrderingError("Provided Billing Account does not contain a Postal Address")
+        # if len(postal_addresses) != 1:
+        #     logger.error("Provided Billing Account does not contain a Postal Address")
+        #     raise OrderingError("Provided Billing Account does not contain a Postal Address")
 
-        postal_address = postal_addresses[0]["medium"]
+        # postal_address = postal_addresses[0]["medium"]
 
+        # return {
+        #     "street": postal_address["streetOne"] + "\n" + postal_address.get("streetTwo", ""),
+        #     "postal": postal_address["postcode"],
+        #     "city": postal_address["city"],
+        #     "province": postal_address["stateOrProvince"],
+        #     "country": postal_address["country"],
+        # }
+
+        # TODO: Add billing address
         return {
-            "street": postal_address["streetOne"] + "\n" + postal_address.get("streetTwo", ""),
-            "postal": postal_address["postcode"],
-            "city": postal_address["city"],
-            "province": postal_address["stateOrProvince"],
-            "country": postal_address["country"],
+            "street": "",
+            "postal": "",
+            "city": "",
+            "province": "",
+            "country": "",
         }
 
     def _process_add_items(self, items, order_id, description, terms_accepted):
@@ -438,13 +445,14 @@ class OrderingManager:
         self._customer = customer
 
         # Check initial state of the order. It must be Acknowledged
-        if order["state"].lower() != "acknowledged":
-            logger.error("Only acknowledged orders can be initially processed")
-            raise OrderingError("Only acknowledged orders can be initially processed")
+        # TODO: Check if this is still necesary as the order has been already set as inProgress
+        # if order["state"].lower() != "acknowledged":
+        #     logger.error("Only acknowledged orders can be initially processed")
+        #     raise OrderingError("Only acknowledged orders can be initially processed")
 
         # Classify order items by action
         items = {"add": [], "modify": [], "delete": [], "no_change": []}
-        for item in order["orderItem"]:
+        for item in order["productOrderItem"]:
             items[item["action"].lower()].append(item)
 
         if len(items["add"]) and len(items["modify"]):
@@ -468,3 +476,15 @@ class OrderingManager:
             redirection_url = self._process_add_items(items["add"], order["id"], description, terms_accepted)
 
         return redirection_url
+
+    def notify_completed(self, order):
+        # Process product order items to instantiate the inventory
+        for orderItem in order["productOrderItem"]:
+            product = orderItem["product"]
+
+            product["name"] = "oid={}".format(order["id"])
+            product["status"] = "created"
+            product["productOffering"] = orderItem["productOffering"]
+
+            inventory_client = InventoryClient()
+            inventory_client.create_product(product)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016 - 2017 CoNWeT Lab., Universidad Politécnica de Madrid
+# Copyright (c) 2016 CoNWeT Lab., Universidad Politécnica de Madrid
+# Copyright (c) 2023 Future Internet Consulting and Development Solutions S.L.
 
 # This file belongs to the business-charging-backend
 # of the Business API Ecosystem.
@@ -38,7 +39,7 @@ class InventoryClient:
         return urljoin(site, "charging/api/orderManagement/products")
 
     def get_hubs(self):
-        r = requests.get(self._inventory_api + "/api/productInventory/v2/hub")
+        r = requests.get(self._inventory_api + "/hub")
         r.raise_for_status()
         return r.json()
 
@@ -55,7 +56,7 @@ class InventoryClient:
         else:
             callback = {"callback": callback_url}
 
-            r = requests.post(self._inventory_api + "/api/productInventory/v2/hub", json=callback)
+            r = requests.post(self._inventory_api + "/hub", json=callback)
 
             if r.status_code != 201 and r.status_code != 409:
                 msg = "It hasn't been possible to create inventory subscription, "
@@ -64,7 +65,7 @@ class InventoryClient:
                 raise ImproperlyConfigured(msg)
 
     def get_product(self, product_id):
-        url = self._inventory_api + "/api/productInventory/v2/product/" + str(product_id)
+        url = self._inventory_api + "/product/" + str(product_id)
 
         r = requests.get(url)
         r.raise_for_status()
@@ -82,7 +83,7 @@ class InventoryClient:
         for k, v in query.items():
             qs += "{}={}&".format(k, v)
 
-        url = self._inventory_api + "/api/productInventory/v2/product" + qs[:-1]
+        url = self._inventory_api + "/product" + qs[:-1]
 
         r = requests.get(url)
         r.raise_for_status()
@@ -96,7 +97,7 @@ class InventoryClient:
         :param patch_body: New values for the product fields to be patched
         """
         # Build product url
-        url = self._inventory_api + "/api/productInventory/v2/product/" + str(product_id)
+        url = self._inventory_api + "/product/" + str(product_id)
 
         r = requests.patch(url, json=patch_body)
         r.raise_for_status()
@@ -109,7 +110,7 @@ class InventoryClient:
         :param product_id: Id of the product to be activated
         """
         patch_body = {
-            "status": "Active",
+            "status": "active",
             "startDate": datetime.utcnow().isoformat() + "Z",
         }
         self.patch_product(product_id, patch_body)
@@ -119,7 +120,7 @@ class InventoryClient:
         Suspends a given product by changing its state to Suspended
         :param product_id: Id of the product to be suspended
         """
-        patch_body = {"status": "Suspended"}
+        patch_body = {"status": "suspended"}
         self.patch_product(product_id, patch_body)
 
     def terminate_product(self, product_id):
@@ -135,7 +136,15 @@ class InventoryClient:
             pass
 
         patch_body = {
-            "status": "Terminated",
+            "status": "terminated",
             "terminationDate": datetime.utcnow().isoformat() + "Z",
         }
         self.patch_product(product_id, patch_body)
+
+    def create_product(self, product):
+        url = self._inventory_api + "/product/"
+
+        r = requests.post(url, json=product)
+        r.raise_for_status()
+
+        return r.json()
