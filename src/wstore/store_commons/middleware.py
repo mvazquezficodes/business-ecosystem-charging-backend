@@ -19,9 +19,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from logging import getLogger
 
 from django.utils.functional import SimpleLazyObject
 
+
+logger = getLogger("wstore.default_logger")
 
 class AuthenticationMiddleware:
     def __init__(self, get_response):
@@ -49,10 +52,13 @@ class AuthenticationMiddleware:
                 issuerDid = request.META["HTTP_X_ISSUER_DID"]
             else:
                 issuerDid = "none"
-        except:
+        except Exception as e:
+            logger.info("Anonymous request due to missing header")
+            logger.debug("Error: " + str(e))
             return AnonymousUser()
 
         if len(token_info) != 2 and token_info[0].lower() != "bearer":
+            logger.info("Anonymous request due to invalid token header")
             return AnonymousUser()
 
         # Check if the user already exist
