@@ -37,8 +37,6 @@ class WstoreConfig(AppConfig):
         from django.core.exceptions import ImproperlyConfigured
 
         from wstore.models import Context
-        from wstore.ordering.inventory_client import InventoryClient
-        from wstore.rss_adaptor.rss_manager import ProviderManager
         from wstore.store_commons.utils.url import is_valid_url
 
         # Creates a new user profile when an user is created
@@ -54,26 +52,3 @@ class WstoreConfig(AppConfig):
             # Create context object if it does not exists
             if not len(Context.objects.all()):
                 Context.objects.create(failed_cdrs=[], failed_upgrades=[])
-
-            # inventory = InventoryClient()
-            # inventory.create_inventory_subscription()
-
-            # # Create RSS default aggregator and provider
-            # credentials = {
-            #     "user": settings.STORE_NAME,
-            #     "roles": [settings.ADMIN_ROLE],
-            #     "email": settings.WSTOREMAIL,
-            # }
-            # prov_manager = ProviderManager(credentials)
-
-            # try:
-            #     prov_manager.register_aggregator(
-            #         {
-            #             "aggregatorId": settings.WSTOREMAIL,
-            #             "aggregatorName": settings.STORE_NAME,
-            #             "defaultAggregator": True,
-            #         }
-            #     )
-            # except Exception as e:  # If the error is a conflict means that the aggregator is already registered
-            #     if e.response.status_code != 409:
-            #         raise e
