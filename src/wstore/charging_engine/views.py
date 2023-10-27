@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2013 - 2017 CoNWeT Lab., Universidad Politécnica de Madrid
+# Copyright (c) 2013 CoNWeT Lab., Universidad Politécnica de Madrid
+# Copyright (c) 2023 Future Internet Consulting and Development Solutions S.L.
 
 # This file belongs to the business-charging-backend
 # of the Business API Ecosystem.
@@ -18,7 +19,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import json
 from copy import deepcopy
 from logging import getLogger
@@ -27,13 +27,14 @@ from requests.exceptions import HTTPError
 from bson import ObjectId
 
 from wstore.asset_manager.resource_plugins.decorators import on_product_acquired
-from wstore.charging_engine.charging.cdr_manager import CDRManager
+from wstore.rss.cdr_manager import CDRManager
 from wstore.charging_engine.charging_engine import ChargingEngine
 from wstore.charging_engine.payment_client.payment_client import PaymentClient, PaymentClientError
 from wstore.ordering.errors import PaymentError, PaymentTimeoutError
 from wstore.ordering.inventory_client import InventoryClient
 from wstore.ordering.models import Offering, Order
 from wstore.ordering.ordering_client import OrderingClient
+from wstore.ordering.ordering_management import OrderingManager
 from wstore.store_commons.database import get_database_connection
 from wstore.store_commons.resource import Resource
 from wstore.store_commons.utils.http import authentication_required, build_response, supported_request_mime_types
@@ -47,21 +48,26 @@ class PaymentConfirmation(Resource):
             off = Offering.objects.get(pk=ObjectId(contract.offering))
             return off.is_digital
 
-        # Set all order items as in progress
-        self.ordering_client.update_state(raw_order, "InProgress")
-
         # Set order items of digital products as completed
         involved_items = [t["item"] for t in transactions]
 
         digital_items = [
             item
-            for item in raw_order["orderItem"]
+            for item in raw_order["productOrderItem"]
             if item["id"] in involved_items and is_digital_contract(order.get_item_contract(item["id"]))
         ]
 
         # Oder Items state is not checked
         # self.ordering_client.update_items_state(raw_order, 'InProgress', digital_items)
-        self.ordering_client.update_items_state(raw_order, "Completed", digital_items)
+        self.ordering_client.update_items_state(raw_order, "completed", digital_items)
+
+        # Notify order completed
+        try:
+            om = OrderingManager()
+            om.notify_completed(raw_order)
+        except:
+            # The order is correct so we cannot set is as failed
+            logger.error("The products for order {} could not be created".format(raw_order["id"]))
 
     def _set_renovation_states(self, transactions, raw_order, order):
         inventory_client = InventoryClient()
@@ -92,7 +98,7 @@ class PaymentConfirmation(Resource):
         if order.pending_payment["concept"] == "initial":
             # Set the order to failed in the ordering API
             # Set all items as Failed, mark the whole order as failed
-            self.ordering_client.update_items_state(raw_order, "Failed")
+            self.ordering_client.update_items_state(raw_order, "failed")
             order.delete()
         else:
             order.state = "paid"
@@ -204,7 +210,7 @@ class PaymentConfirmation(Resource):
         # Set the order to failed in the ordering API
         # Set all items as Failed, mark the whole order as Failed
         # client.update_state(raw_order, 'Failed')
-        self.ordering_client.update_items_state(raw_order, "Failed")
+        self.ordering_client.update_items_state(raw_order, "failed")
         order.delete()
 
         logger.debug(f"Payment candelled for order {order.order_id}.")
