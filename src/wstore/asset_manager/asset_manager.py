@@ -35,6 +35,7 @@ from wstore.store_commons.errors import ConflictError
 from wstore.store_commons.rollback import downgrade_asset, downgrade_asset_pa, rollback
 from wstore.store_commons.utils.name import is_valid_file
 from wstore.store_commons.utils.url import is_valid_url, url_fix
+from wstore.asset_manager import service_category_imp
 
 logger = getLogger("wstore.default_logger")
 
@@ -104,7 +105,7 @@ class AssetManager:
             download_link=resource_data["link"],
             resource_path=resource_data["content_path"],
             content_type=resource_data["content_type"].lower(),
-            resource_type=resource_data["resource_type"],
+            resource_type=resource_data["resource_type"], #Esto sería o asset type, creo  
             state=resource_data["state"],
             is_public=resource_data["is_public"],
             meta_info=resource_data["metadata"],
@@ -115,6 +116,7 @@ class AssetManager:
         logger.debug("Created resource model")
         return resource
 
+    #Vai ser aquí onde se creen os sevice categories
     def _validate_asset_type(self, resource_type, content_type, provided_as, metadata):
         logger.debug(f"Validating asset type {resource_type}")
 
@@ -129,7 +131,7 @@ class AssetManager:
             logger.error(f"The asset type {resource_type} does not exist")
             raise ObjectDoesNotExist(f"The asset type {resource_type} does not exist")
 
-        asset_type = plugins[0]
+        asset_type = plugins[0]  #Os asset_types son os plugins
 
         # Validate content type
         if len(asset_type.media_types) and content_type not in asset_type.media_types:
@@ -176,6 +178,18 @@ class AssetManager:
                 # Include default values
                 if k not in metadata and "default" in v:
                     metadata[k] = v["default"]
+        
+        ###############
+        #Necesito explicación de como relacionar os elementos do 
+        #ResourcePlugin co resto das cousas
+        sc_json = {
+            "name" : resource_type,
+            "version" : asset_type.version
+        }
+
+        sc_client = service_category_imp.ServiceCategory()
+        sc_client.create_service_category(sc_json)
+        ###############
 
         logger.debug("Validated asset type {resource_type} OK")
 
@@ -346,7 +360,7 @@ class AssetManager:
             "state": resource.state,
             "href": resource.get_uri(),
             "location": resource.get_url(),
-            "resourceType": resource.resource_type,
+            "resourceType": resource.resource_type,                           
             "metadata": resource.meta_info,
         }
 

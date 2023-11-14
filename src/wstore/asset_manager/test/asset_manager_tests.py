@@ -19,6 +19,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# ./manage.py test wstore.asset_manager.test.asset_manager_tests
+# Estes tests no van funcionar porque usan mocks.
+# Vou crear os meus propios test para que usen o service_category_imp
+# e así podo ver se funciona ben a clase e o que crea, despois hai que modificar
+# esto e a clase asset_manager.
+
 
 from copy import deepcopy
 from importlib import reload
