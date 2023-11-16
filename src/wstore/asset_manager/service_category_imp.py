@@ -63,7 +63,7 @@ class ServiceCategory:
         r = requests.delete(url)
         r.raise_for_status()
 
-    def get_service_category(self, serviceCategory_id=None):
+    def get_service_category(self, serviceCategory_name=None):
         """
         Retrieves the serviceCategory made by a customer filtered by service and status
         :param customer: username of the customer
@@ -77,10 +77,10 @@ class ServiceCategory:
 
         # Get customer serviceCategory filtered by state
         path = "serviceCategory/"
-        url = urljoin(self._serviceCategory_api, path) #+ "?relatedParty.id=" + customer
+        url = urljoin(self._serviceCategory_api, path)
 
-        if serviceCategory_id is not None:
-            url += str(serviceCategory_id)
+        if serviceCategory_name is not None:
+            url += "?name=" + str(serviceCategory_name)
 
         r = requests.get(url, headers={"Accept": "application/json"})
 

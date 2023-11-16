@@ -10,14 +10,15 @@ from parameterized import parameterized
 from wstore.asset_manager import service_category_imp
 #from wstore.charging_engine.accounting.errors import UsageError
 
-#./manage.py test wstore.asset_manager.test.integration_t_serviceCatalog
-#Revisar porque ao mellor teño que cambiarlle o nombre a serviceCatalogClient
+#./manage.py test wstore.asset_manager.test.integration_t_serviceCategory
+#Revisar porque ao mellor teño que cambiarlle o nombre a serviceCategoryClient
 
 EMPTY_SERVICE_CATALOG = {
+    "name" : "test"
 }
 
 
-class ServiceCatalogClientTestCase(TestCase):
+class ServiceCategoryClientTestCase(TestCase):
     tags = ("service-catalog-client",)
 
     def setUp(self):
@@ -83,11 +84,12 @@ class ServiceCatalogClientTestCase(TestCase):
 
         client = service_category_imp.ServiceCategory()
         created_service_category = client.create_service_category(response)
-        got_service_category = client.get_service_category(created_service_category['id'])
-        print(got_service_category)
-        self.assertEquals(created_service_category, got_service_category)
+        got_service_category = client.get_service_category(created_service_category['name'])
+        print(created_service_category)
+        print(got_service_category[0])
+        self.assertEquals(created_service_category, got_service_category[0])
 
-        client.delete_service_category(got_service_category['id'])
+        client.delete_service_category(got_service_category[0]['id'])
         got_service_category = client.get_service_category()
         self.assertEquals([], got_service_category)
 

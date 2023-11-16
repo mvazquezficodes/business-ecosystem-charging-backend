@@ -19,12 +19,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# ./manage.py test wstore.asset_manager.test.asset_manager_tests
-# Estes tests no van funcionar porque usan mocks.
-# Vou crear os meus propios test para que usen o service_category_imp
-# e así podo ver se funciona ben a clase e o que crea, despois hai que modificar
-# esto e a clase asset_manager.
-
 
 from copy import deepcopy
 from importlib import reload
@@ -71,7 +65,7 @@ class ResourceRetrievingTestCase(TestCase):
 
         asset_manager.Resource.objects.filter.return_value = [self._mock_resource(r, self.org) for r in EXISTING_INFO]
         asset_manager.Resource.objects.get.return_value = self._mock_resource(EXISTING_INFO[0], self.org)
-
+    
     @classmethod
     def tearDownClass(cls):
         # Restore resource model

@@ -24,6 +24,7 @@ from shutil import rmtree
 
 logger = getLogger("wstore.default_logger")
 
+#Fijarse
 
 def installPluginRollback(func):
     class Logger:

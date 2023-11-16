@@ -19,6 +19,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Cosas que necesito:
+# Tener related party, no se puede crear un service specification sin related party
+# En principio estos serían service specifications, pero no hay relación entre
+# service specification y service category
+
 import base64
 import json
 import os
@@ -40,7 +45,7 @@ from wstore.asset_manager import service_category_imp
 logger = getLogger("wstore.default_logger")
 
 
-class AssetManager:
+class ServiceSpecificationManager:
     def __init__(self):
         pass
 
