@@ -40,7 +40,7 @@ from wstore.store_commons.errors import ConflictError
 from wstore.store_commons.rollback import downgrade_asset, downgrade_asset_pa, rollback
 from wstore.store_commons.utils.name import is_valid_file
 from wstore.store_commons.utils.url import is_valid_url, url_fix
-from wstore.asset_manager import service_category_imp
+from wstore.asset_manager import service_specification_imp, service_candidate_imp
 
 logger = getLogger("wstore.default_logger")
 
@@ -118,12 +118,39 @@ class ServiceSpecificationManager:
 
         self.rollback_logger["models"].append(resource)
 
-        ############
-        # Aquí se llamaría al service specification
-        ############
+        self._create_service_spec_cand(resource)
 
         logger.debug("Created resource model")
         return resource
+    
+    def _create_service_spec_cand(resource):
+
+         ############
+        # Aquí se llamaría al service specification
+        # El id del resource se guarda como un characteristic
+        # Falta related party, pero non sei se hai que telo en conta
+        service_json = {
+            "name" : "",
+            "version" : resource.version,
+            "specCharacteristic" :{
+                id : resource.get_id()
+            }
+        }
+        sp_service = service_specification_imp.ServiceSpecification()
+        created_specification = sp_service.create_service_specification(service_json)
+        
+        # Para o candiate json necesito a referencia ao service
+        candidate_json = {
+            "version" : created_specification['version'],
+            "serviceSpecification" : {
+                "id" : created_specification['id']
+            }
+        }
+        scand_service = service_candidate_imp.ServiceCandidate()
+        scand_service.create_service_candidate(candidate_json)
+        ############
+
+        return
 
     def _validate_asset_type(self, resource_type, content_type, provided_as, metadata):
         logger.debug(f"Validating asset type {resource_type}")
@@ -210,6 +237,7 @@ class ServiceSpecificationManager:
         resource_data["metadata"] = data.get("metadata", {})
 
         # Check if the asset is a file upload or a service registration
+        # Por ahora pa que sexa máis fácil asumimos que non hai file
         provided_as = "FILE"
         if "content" in data:
             if isinstance(data["content"], str):

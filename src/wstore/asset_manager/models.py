@@ -46,7 +46,7 @@ class ResourceVersion(models.Model):
 
 
 class Resource(models.Model):
-    _id = models.ObjectIdField()
+    _id = models.ObjectIdField() # necesita ser accesible, pode poser un método get_id
     product_id = models.CharField(max_length=100, blank=True, null=True)
     version = models.CharField(max_length=20)  # This field maps the Product Spec version
     provider = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
@@ -69,6 +69,9 @@ class Resource(models.Model):
         base_uri = settings.SITE
 
         return urljoin(base_uri, "charging/api/assetManagement/assets/" + str(self.pk))
+
+    def get_id(self):
+        return id
 
     class Meta:
         app_label = "wstore"
