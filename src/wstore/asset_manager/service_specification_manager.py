@@ -40,7 +40,7 @@ from wstore.store_commons.errors import ConflictError
 from wstore.store_commons.rollback import downgrade_asset, downgrade_asset_pa, rollback
 from wstore.store_commons.utils.name import is_valid_file
 from wstore.store_commons.utils.url import is_valid_url, url_fix
-from wstore.asset_manager import service_specification_imp, service_candidate_imp
+from wstore.asset_manager import service_specification_imp, service_candidate_imp, service_category_imp
 
 logger = getLogger("wstore.default_logger")
 
@@ -125,12 +125,17 @@ class ServiceSpecificationManager:
     
     def _create_service_spec_cand(resource):
 
-         ############
-        # Aquí se llamaría al service specification
-        # El id del resource se guarda como un characteristic
+        ############
+        # Preguntar sobre el related party
         # Falta related party, pero non sei se hai que telo en conta
+
+        plugin_name = resource.resource_type
+        cat_service = service_category_imp.ServiceCategory()
+        category = cat_service.get_service_category(plugin_name)
+
         service_json = {
             "name" : "",
+            "description" : "",
             "version" : resource.version,
             "specCharacteristic" :{
                 id : resource.get_id()
@@ -144,13 +149,14 @@ class ServiceSpecificationManager:
             "version" : created_specification['version'],
             "serviceSpecification" : {
                 "id" : created_specification['id']
+            },
+            "category" : {
+                "id" : category[0]['id']
             }
         }
-        scand_service = service_candidate_imp.ServiceCandidate()
-        scand_service.create_service_candidate(candidate_json)
+        cand_service = service_candidate_imp.ServiceCandidate()
+        cand_service.create_service_candidate(candidate_json)
         ############
-
-        return
 
     def _validate_asset_type(self, resource_type, content_type, provided_as, metadata):
         logger.debug(f"Validating asset type {resource_type}")
