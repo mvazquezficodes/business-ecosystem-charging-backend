@@ -76,8 +76,8 @@ class AssetManager:
         # Check if the file already exists
         if os.path.exists(file_path):
             res = Resource.objects.get(resource_path=resource_path)
-            if res.product_id is not None:
-                # If the resource has product_id field, it means that a product
+            if res.service_id is not None:
+                # If the resource has service_id field, it means that a product
                 # spec has been created, so it cannot be overridden
                 logger.error(f"The asset file `{file_name}` already exists")
                 raise ConflictError(f"The provided digital asset file ({file_name}) already exists")
@@ -112,10 +112,6 @@ class AssetManager:
         )
 
         self.rollback_logger["models"].append(resource)
-
-        ############
-        # Aquí se llamaría al service specification
-        ############
 
         logger.debug("Created resource model")
         return resource
@@ -319,7 +315,7 @@ class AssetManager:
             logger.error(f"It is not allowed to upgrade public assets, create a new one instead")
             raise ValueError("It is not allowed to upgrade public assets, create a new one instead")
 
-        if asset.product_id is None:
+        if asset.service_id is None:
             logger.error(f"It is not possible to upgrade an asset not included in a product specification")
             raise ValueError("It is not possible to upgrade an asset not included in a product specification")
 
@@ -368,8 +364,8 @@ class AssetManager:
 
         return self.get_resource_info(asset)
 
-    def get_product_assets(self, product_id):
-        assets = Resource.objects.filter(product_id=product_id)
+    def get_product_assets(self, service_id):
+        assets = Resource.objects.filter(service_id=service_id)
 
         return [self.get_resource_info(asset) for asset in assets]
 

@@ -47,7 +47,8 @@ class ResourceVersion(models.Model):
 
 class Resource(models.Model):
     _id = models.ObjectIdField() # necesita ser accesible, pode poser un método get_id
-    product_id = models.CharField(max_length=100, blank=True, null=True)
+    #product_id = models.CharField(max_length=100, blank=True, null=True)
+    service_id = models.CharField(max_length=100, blank=True, null=True) #este es el id del service spec del api
     version = models.CharField(max_length=20)  # This field maps the Product Spec version
     provider = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
     content_type = models.CharField(max_length=100)

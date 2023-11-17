@@ -24,6 +24,8 @@ import os
 from logging import getLogger
 
 from django.conf import settings
+from wstore.asset_manager import service_specification_imp
+
 
 logger = getLogger("wstore.default_logger")
 
@@ -46,6 +48,18 @@ def downgrade_asset(asset):
     asset.content_type = prev_version.content_type
     asset.state = "attached"
     asset.save()
+
+
+    ################
+    service_json = {
+        "name" : "",
+        "description" : "",
+        "version" : asset.version
+    }
+
+    sp_service = service_specification_imp.ServiceSpecification()
+    created_specification = sp_service.create_service_specification(service_json)
+    ################
 
     logger.debug(f"Downgraded asset {asset} OK")
 
