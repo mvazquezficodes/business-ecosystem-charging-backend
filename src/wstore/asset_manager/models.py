@@ -72,7 +72,7 @@ class Resource(models.Model):
         return urljoin(base_uri, "charging/api/assetManagement/assets/" + str(self.pk))
 
     def get_id(self):
-        return id
+        return self._id
 
     class Meta:
         app_label = "wstore"

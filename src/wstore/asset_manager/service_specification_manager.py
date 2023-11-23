@@ -31,7 +31,7 @@ class ServiceSpecificationManager:
     def __init__(self):
         pass
 
-    def create_service_spec_cand(resource):
+    def create_service_spec_cand(self, resource):
 
         ############
         # Marcos
@@ -41,34 +41,32 @@ class ServiceSpecificationManager:
         plugin_name = resource.resource_type
         cat_service = service_category_imp.ServiceCategory()
         category = cat_service.get_service_category(plugin_name)
+        resource_id = resource.get_id()
 
         service_json = {
             "name" : "",
             "description" : "",
             "version" : resource.version,
-            "specCharacteristic" :{
-                id : resource.get_id()
-            }
+            "specCharacteristic" : [{
+                "name" : str(resource_id)
+            }]
         }
         sp_service = service_specification_imp.ServiceSpecification()
         created_specification = sp_service.create_service_specification(service_json)
         
-        # Para o candiate json necesito a referencia ao service
+        # Para o candiate json necesito a referencia ao service e ao category
+        # Hai que comprobar si mete los elementos que tocan
         candidate_json = {
             "version" : created_specification['version'],
-            "serviceSpecification" : {
-                "id" : created_specification['id']
-            },
-            "category" : {
-                "id" : category[0]['id']
-            }
+            "serviceSpecification" : created_specification,
+            "category" : category
         }
         cand_service = service_candidate_imp.ServiceCandidate()
         cand_service.create_service_candidate(candidate_json)
         ############
 
 
-    def update_service_spec_cand(resource):
+    def update_service_spec_cand(self, resource):
 
         ############
         # Marcos
@@ -80,13 +78,14 @@ class ServiceSpecificationManager:
         plugin_name = resource.resource_type
         cat_service = service_category_imp.ServiceCategory()
         category = cat_service.get_service_category(plugin_name)
+        resource_id = resource.get_id()
 
         service_json = {
             "name" : "",
             "description" : "",
             "version" : resource.version,
             "specCharacteristic" :{
-                "valueType" : resource.content_type
+                "name" : str(resource_id)
             }
         }
         sp_service = service_specification_imp.ServiceSpecification()

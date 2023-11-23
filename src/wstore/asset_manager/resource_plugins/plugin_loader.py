@@ -32,7 +32,7 @@ from wstore.asset_manager.resource_plugins.plugin_rollback import installPluginR
 from wstore.asset_manager.resource_plugins.plugin_validator import PluginValidator
 from wstore.models import Resource, ResourcePlugin
 from wstore.store_commons.utils.version import is_lower_version
-from wstore.asset_manager import service_category_imp
+from wstore.asset_manager import service_category_manager
 
 logger = getLogger("wstore.default_logger")
 
@@ -164,15 +164,11 @@ class PluginLoader:
         if plugin_model.pull_accounting:
             module_class(plugin_model).configure_usage_spec()
 
-        ###############
-        sc_json = {
-            "name" : plugin_model.name,
-            "version" : plugin_model.version
-        }
-
-        sc_client = service_category_imp.ServiceCategory()
-        sc_client.create_service_category(sc_json)
-        ###############
+        #####################
+        # service category
+        s_cat = service_category_manager.ServiceCategoryManager()
+        s_cat.create_service_cat(plugin_model)
+        #####################
 
         logger.info(f"Plugin {plugin_id} installed.")
 
@@ -230,13 +226,9 @@ class PluginLoader:
             self._downgrade_plugin_to_last_version(plugin_id, plugin_model)
 
         ###############
-        sc_json = {
-            "name" : plugin_model.name,
-            "version" : plugin_model.version
-        }
-
-        sc_client = service_category_imp.ServiceCategory()
-        sc_client.update_service_category(sc_json)
+        # service category
+        s_cat = service_category_manager.ServiceCategoryManager()
+        s_cat.update_service_cat(plugin_model)
         ###############
 
         logger.info(f"Plugin {plugin_id} successfully downgraded")
@@ -273,11 +265,11 @@ class PluginLoader:
         rmtree(plugin_path)
 
         ###############
+        # service category
         # Hai que mirar o tema dos nomes dos plugins porque non podo buscalos ou borralos
         # por id porque non vou ter o id da BD
-        sc_client = service_category_imp.ServiceCategory()
-        plugin_rm = sc_client.get_service_category(plugin_model.name)
-        sc_client.delete_service_category(plugin_rm['id'])
+        s_cat = service_category_manager.ServiceCategoryManager()
+        s_cat.remove_service_cat(plugin_model)
         ###############
 
         # Remove model

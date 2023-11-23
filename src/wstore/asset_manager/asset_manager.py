@@ -35,7 +35,7 @@ from wstore.store_commons.errors import ConflictError
 from wstore.store_commons.rollback import downgrade_asset, downgrade_asset_pa, rollback
 from wstore.store_commons.utils.name import is_valid_file
 from wstore.store_commons.utils.url import is_valid_url, url_fix
-from wstore.asset_manager import service_category_imp
+from wstore.asset_manager import service_specification_manager
 
 logger = getLogger("wstore.default_logger")
 
@@ -256,6 +256,9 @@ class AssetManager:
 
         resource_data, current_organization = self._load_resource_info(provider, data, file_=file_)
         resource = self._create_resource_model(current_organization, resource_data)
+        sp_manager = service_specification_manager.ServiceSpecificationManager()
+        sp_manager.create_service_spec_cand(resource)
+
 
         logger.info(f"Uploaded asset: {resource}")
         return resource
