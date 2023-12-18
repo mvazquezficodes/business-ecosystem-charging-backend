@@ -71,8 +71,8 @@ class Resource(models.Model):
 
         return urljoin(base_uri, "charging/api/assetManagement/assets/" + str(self.pk))
 
-    def get_id(self):
-        return self._id
+    #def get_id(self):
+    #    return self._id
 
     class Meta:
         app_label = "wstore"
@@ -81,6 +81,7 @@ class Resource(models.Model):
 class ResourcePlugin(models.Model):
     _id = models.ObjectIdField()
     plugin_id = models.CharField(max_length=100)
+    category_id = models.CharField(max_length=100) # Id del category en el API
     name = models.CharField(max_length=100)
     version = models.CharField(max_length=50)
     version_history = models.JSONField(default=[])

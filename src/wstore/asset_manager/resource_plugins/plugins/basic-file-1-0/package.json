@@ -1,0 +1,9 @@
+{
+  "name": "Basic File",
+  "author": "fdelavega",
+  "version": "1.0",
+  "module": "basic_file.BasicPlugin",
+  "media_types": [],
+  "formats": ["FILE"],
+  "overrides": []
+}

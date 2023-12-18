@@ -51,14 +51,8 @@ def downgrade_asset(asset):
 
 
     ################
-    service_json = {
-        "name" : "",
-        "description" : "",
-        "version" : asset.version
-    }
-
-    sp_service = service_specification_imp.ServiceSpecification()
-    created_specification = sp_service.create_service_specification(service_json)
+    # Teño que facer comprobación si hace falta actualizarlo a una versión anterio
+    # o borrarlo de la base de datos
     ################
 
     logger.debug(f"Downgraded asset {asset} OK")

@@ -26,23 +26,27 @@ from wstore.asset_manager import service_specification_imp, service_candidate_im
 
 logger = getLogger("wstore.default_logger")
 
+# Espero recibir el json bien montado
+
 
 class ServiceCategoryManager:
     def __init__(self):
         pass
 
-    def create_service_cat(self, plugin_model):
+    def create_service_cat(self, plugin_model, rb_log=None):
 
         ############
         # Marcos
 
-        sc_json = {
-            "name" : plugin_model.name,
-            "version" : plugin_model.version
-        }
 
+        logger.debug("Serializar el json")
+        #sc_json = {
+        #    "name" : plugin_model.name,
+        #    "version" : plugin_model.version
+        #}
+        logger.debug("Tras serializar")
         sc_client = service_category_imp.ServiceCategory()
-        sc_client.create_service_category(sc_json)
+        return sc_client.create_service_category(plugin_model)
         ############
 
     def update_service_cat(self, plugin_model):

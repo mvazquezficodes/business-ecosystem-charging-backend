@@ -256,9 +256,11 @@ class AssetManager:
 
         resource_data, current_organization = self._load_resource_info(provider, data, file_=file_)
         resource = self._create_resource_model(current_organization, resource_data)
-        sp_manager = service_specification_manager.ServiceSpecificationManager()
-        sp_manager.create_service_spec_cand(resource)
 
+        ########################
+        #sp_manager = service_specification_manager.ServiceSpecificationManager()
+        #sp_manager.create_service_spec_cand(resource)
+        ########################
 
         logger.info(f"Uploaded asset: {resource}")
         return resource
@@ -343,6 +345,12 @@ class AssetManager:
         t = threading.Timer(15, self._upgrade_timer)
         t.start()
 
+        ######################
+        # Necisto mirar lo del rollback porque si falla el api entonces
+        # Necesitamos borrarlo en local
+        #sp_manager = service_specification_manager.ServiceSpecificationManager()
+        #sp_manager.update_service_spec_cand(asset)
+        ######################
         
         logger.info(f"Upgrading asset: {asset_id} OK")
         return asset

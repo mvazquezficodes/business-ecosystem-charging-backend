@@ -1,0 +1,9 @@
+{
+  "name": "Basic Service",
+  "author": "fdelavega",
+  "version": "1.0",
+  "module": "basic_url.BasicPlugin",
+  "media_types": [],
+  "formats": ["URL"],
+  "overrides": []
+}

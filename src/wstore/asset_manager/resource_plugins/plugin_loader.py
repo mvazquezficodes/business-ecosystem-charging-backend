@@ -63,6 +63,7 @@ class PluginLoader:
 
     def _update_model_data_from_json(self, model, module, json_info):
         # Create or update plugin model data
+        model.category_id = json_info["category_id"]
         model.name = json_info["name"]
         model.version = json_info["version"]
         model.author = json_info["author"]
@@ -155,6 +156,18 @@ class PluginLoader:
         if pull_accounting_errors:
             logger.error("Error in implementation for pull accounting")
             raise PluginError(pull_accounting_errors)
+        
+        #####################
+        # service category
+        logger.debug("Creating API entry")
+        s_cat = service_category_manager.ServiceCategoryManager()
+        created_cat = s_cat.create_service_cat(json_info)
+        logger.debug("Antes del rb_log")
+        rb_log.log_action("API", created_cat["name"])
+        logger.debug("Antes de crear el cateogy_id en el json")
+        json_info["category_id"] = created_cat["id"]
+        logger.debug("Tras crearlo en el API")
+        #####################
 
         self._update_model_data_from_json(plugin_model, module, json_info)
         rb_log.log_action("MODEL", plugin_model)
@@ -163,12 +176,6 @@ class PluginLoader:
         # Configure usage specifications if needed
         if plugin_model.pull_accounting:
             module_class(plugin_model).configure_usage_spec()
-
-        #####################
-        # service category
-        s_cat = service_category_manager.ServiceCategoryManager()
-        s_cat.create_service_cat(plugin_model)
-        #####################
 
         logger.info(f"Plugin {plugin_id} installed.")
 
@@ -226,6 +233,7 @@ class PluginLoader:
             self._downgrade_plugin_to_last_version(plugin_id, plugin_model)
 
         ###############
+        # En la base de datos del api solo se guardará la versión acctual
         # service category
         s_cat = service_category_manager.ServiceCategoryManager()
         s_cat.update_service_cat(plugin_model)

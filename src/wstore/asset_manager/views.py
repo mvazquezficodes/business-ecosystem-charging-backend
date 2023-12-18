@@ -38,6 +38,7 @@ from wstore.store_commons.utils.http import (
     get_content_type,
     supported_request_mime_types,
 )
+from wstore.asset_manager import service_specification_manager
 
 
 class AssetCollection(Resource):
@@ -188,6 +189,14 @@ class UploadCollection(Resource):
 
         def upload_asset(req, user, content_type):
             asset_manager = AssetManager()
+
+            ##########################
+            # APIs TMForums
+            # En el body de la request iría json con la info bien ordenada
+            # Si falla xa tería que ir dar o error e parar a execución
+            #mspecification = service_specification_manager.ServiceSpecificationManager()
+            #mspecification.create_service_spec_cand(req.body)
+            ##########################
 
             if content_type == "application/json":
                 data = json.loads(req.body)

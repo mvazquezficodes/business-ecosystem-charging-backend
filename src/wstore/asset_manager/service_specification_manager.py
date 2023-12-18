@@ -26,31 +26,33 @@ from wstore.asset_manager import service_specification_imp, service_candidate_im
 
 logger = getLogger("wstore.default_logger")
 
+# Espero recibir el json bien montado
+
 
 class ServiceSpecificationManager:
     def __init__(self):
         pass
 
-    def create_service_spec_cand(self, resource):
+    def create_service_spec_cand(self, service_json):
 
         ############
         # Marcos
         # Preguntar sobre el related party
         # Falta related party, pero non sei se hai que telo en conta
 
-        plugin_name = resource.resource_type
-        cat_service = service_category_imp.ServiceCategory()
-        category = cat_service.get_service_category(plugin_name)
-        resource_id = resource.get_id()
+        #plugin_name = resource.resource_type
+        #category = cat_service.get_service_category(plugin_name)
+        #cat_service = service_category_imp.ServiceCategory()
+        #resource_id = resource.get_id()
 
-        service_json = {
-            "name" : "",
-            "description" : "",
-            "version" : resource.version,
-            "specCharacteristic" : [{
-                "name" : str(resource_id)
-            }]
-        }
+        #service_json = {
+        #    "name" : "",
+        #    "description" : "",
+        #    "version" : resource.version,
+        #    "specCharacteristic" : [{
+        #        "name" : str(resource_id)
+        #    }]
+        #}
         sp_service = service_specification_imp.ServiceSpecification()
         created_specification = sp_service.create_service_specification(service_json)
         
@@ -59,14 +61,14 @@ class ServiceSpecificationManager:
         candidate_json = {
             "version" : created_specification['version'],
             "serviceSpecification" : created_specification,
-            "category" : category
+            "category" : service_json.category
         }
         cand_service = service_candidate_imp.ServiceCandidate()
         cand_service.create_service_candidate(candidate_json)
         ############
 
 
-    def update_service_spec_cand(self, resource):
+    def update_service_spec_cand(self, plugin_name,service_json):
 
         ############
         # Marcos
@@ -75,19 +77,17 @@ class ServiceSpecificationManager:
         # El provider puede ser el un EntitySpecifcicationRelationship
         # Non sei cales son os characteristic que necesito
 
-        plugin_name = resource.resource_type
         cat_service = service_category_imp.ServiceCategory()
         category = cat_service.get_service_category(plugin_name)
-        resource_id = resource.get_id()
 
-        service_json = {
-            "name" : "",
-            "description" : "",
-            "version" : resource.version,
-            "specCharacteristic" :{
-                "name" : str(resource_id)
-            }
-        }
+        #service_json = {
+        #    "name" : "",
+        #    "description" : "",
+        #    "version" : resource.version,
+        #    "specCharacteristic" :{
+        #        "name" : str(resource_id)
+        #    }
+        #}
         sp_service = service_specification_imp.ServiceSpecification()
-        updated_specification = sp_service.update_service_specification(resource.service_id, service_json)
+        updated_specification = sp_service.update_service_specification(category.service_id, service_json)
         ############
